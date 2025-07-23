@@ -3,6 +3,7 @@ import threading
 import json
 import pygame as pg
 import logging
+import time
 
 # Configuração de logging
 logging.basicConfig(
@@ -21,9 +22,11 @@ RES_ESCALADA = (1280, 960)
 # Variáveis globais
 jogador_id = None
 estado_jogo = {}
+latencia_ms = 0
 
 def receber_dados(sock):
     global estado_jogo
+    global latencia_ms
     buffer = ""
     while True:
         try:
@@ -36,6 +39,9 @@ def receber_dados(sock):
                 if not linha.strip():
                     continue
                 estado = json.loads(linha)
+                if estado.get("tipo") == "pong":
+                    latencia_ms = (time.time() - estado["timestamp"]) * 1000
+                    logging.info(f"Latência: {latencia_ms:.2f} ms")
                 if estado.get("tipo") == "estado":
                     estado_jogo = estado
         except Exception as e:
@@ -68,16 +74,10 @@ def tratar_eventos_input(direcao_atual):
     keys = pg.key.get_pressed()
     nova = direcao_atual
 
-    if jogador_id == 1:
-        if keys[pg.K_UP]: nova = "cima"
-        if keys[pg.K_DOWN]: nova = "baixo"
-        if keys[pg.K_LEFT]: nova = "esquerda"
-        if keys[pg.K_RIGHT]: nova = "direita"
-    elif jogador_id == 2:
-        if keys[pg.K_w]: nova = "cima"
-        if keys[pg.K_s]: nova = "baixo"
-        if keys[pg.K_a]: nova = "esquerda"
-        if keys[pg.K_d]: nova = "direita"
+    if keys[pg.K_UP]: nova = "cima"
+    if keys[pg.K_DOWN]: nova = "baixo"
+    if keys[pg.K_LEFT]: nova = "esquerda"
+    if keys[pg.K_RIGHT]: nova = "direita"
 
     return nova if nova != direcao_atual else None
 
@@ -145,10 +145,22 @@ def main():
         sprites = carregar_sprites()
         direcao_atual = "direita" if jogador_id == 1 else "esquerda"
 
+        # Para teste de latência
+        ultimo_ping = 0
+
+        # Loop principal do jogo
         while True:
             for e in pg.event.get():
                 if e.type == pg.QUIT:
                     return
+                
+            # Para medição de latência
+            if time.time() - ultimo_ping > 1:
+                try:
+                    sock.sendall(json.dumps({"acao": "ping"}).encode())
+                    ultimo_ping = time.time()
+                except Exception as e:
+                    logging.error(f"Erro ao enviar ping: {e}")
 
             nova = tratar_eventos_input(direcao_atual)
             if nova:
@@ -173,7 +185,10 @@ def main():
 
                 # Pontuação
                 tela_base.blit(fonte.render(f"Jogador 1: {estado_jogo['jogadores']['1']['vitorias']}", True, (0, 0, 0)), (10, 5))
-                tela_base.blit(fonte.render(f"Jogador 2: {estado_jogo['jogadores']['2']['vitorias']}", True, (0, 0, 0)), (450, 5))
+                tela_base.blit(fonte.render(f"Jogador 2: {estado_jogo['jogadores']['2']['vitorias']}", True, (0, 0, 0)), (520, 5))
+
+                # Latência
+                tela_base.blit(fonte.render(f"Latência: {latencia_ms:.1f} ms", True, (0, 0, 0)), (240, 5))
 
                 # Mensagens de status
                 vivo = estado_jogo["jogadores"][str(jogador_id)]["vivo"]

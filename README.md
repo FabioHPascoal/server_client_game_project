@@ -40,8 +40,7 @@ Este projeto foi desenvolvido como critério avaliativo para a disciplina de Red
 
 ## Controles
 
-- Jogador 1: setas do teclado
-- Jogador 2: teclas W A S D
+   Setas do teclado para movimentação nas 4 direções
 
 ## Funcionalidades
 

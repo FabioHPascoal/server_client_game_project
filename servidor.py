@@ -26,6 +26,7 @@ jogadores = {
     2: {"corpo": [[26, 18], [27, 18]], "direcao": "esquerda", "vivo": True, "vitorias": 0}
 }
 
+# A fila de comandos é protegida por um lock para evitar condições de corrida
 comandos = {1: [], 2: []}
 lock = threading.Lock()
 
@@ -41,11 +42,20 @@ def tratar_cliente(conn, jogador_id):
             if not data:
                 break
             comando = json.loads(data)
+            
+            # Para teste de latência
+            if comando["acao"] == "ping":
+                inicio = time.time()
+                conn.sendall((json.dumps({"tipo": "pong", "timestamp": inicio}) + "\n").encode())
+                continue
+            
             with lock:
                 if comando["acao"] == "direcao":
                     comandos[jogador_id].append(comando["direcao"])
+
     except Exception as e:
         logging.error(f"Erro com jogador {jogador_id}: {e}")
+    
     finally:
         conn.close()
         logging.info(f"Jogador {jogador_id} desconectado.")
@@ -58,13 +68,20 @@ def mover_cobra(cobra):
 
 def colisao(cobra, outras):
     x, y = cobra["corpo"][0]
+    
+    # Verificação de colisão com as paredes
     if x < 0 or y < 0 or x >= GRID_W or y >= GRID_H:
         return True
+    
+    # Verificação de colisão com o próprio corpo
     if cobra["corpo"][0] in cobra["corpo"][1:]:
         return True
+    
+    # Verificação de colisão com outras cobras
     for outra in outras:
         if cobra["corpo"][0] in outra["corpo"]:
             return True
+        
     return False
 
 def reiniciar_jogo():
@@ -80,6 +97,8 @@ def reiniciar_jogo():
 
 def main():
     global maca, jogo_em_andamento
+
+    time_morte = time.time() # Inicialização time para contar o tempo após a morte
 
     servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     servidor.bind(("localhost", 12345))
@@ -153,7 +172,8 @@ def main():
             except Exception as e:
                 logging.warning(f"Erro ao enviar estado: {e}")
 
-        time.sleep(0.5)
+        # Controla a velocidade do servidor
+        time.sleep(0.2)
 
 if __name__ == "__main__":
     main()
