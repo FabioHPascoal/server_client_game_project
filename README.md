@@ -24,7 +24,7 @@ Este projeto foi desenvolvido como critério avaliativo para a disciplina de Red
 
 1. Clone o repositório:
    ```bash
-   git clone https://github.com/seu-usuario/snake-battle.git
+   git clone github.com/FabioHPascoal/server_client_game_project.git
    cd snake-battle
    ```
 
