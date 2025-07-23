@@ -111,7 +111,7 @@ def desenhar_cobra(tela, corpo, sprites):
 
                 if da is not None and dp is not None: angulo = curvas.get((da, dp), 0)
                 else:angulo = 0
-                
+
                 img = pg.transform.rotate(sprites["body_curve"], angulo)
 
         tela.blit(img, (x, y))
@@ -172,8 +172,8 @@ def main():
                         desenhar_cobra(tela_base, jogador["corpo"], sprites[int(pid)])
 
                 # Pontuação
-                tela_base.blit(fonte.render(f"Jogador 1: {estado_jogo['jogadores']['1']['pontos']}", True, (0, 0, 0)), (10, 5))
-                tela_base.blit(fonte.render(f"Jogador 2: {estado_jogo['jogadores']['2']['pontos']}", True, (0, 0, 0)), (450, 5))
+                tela_base.blit(fonte.render(f"Jogador 1: {estado_jogo['jogadores']['1']['vitorias']}", True, (0, 0, 0)), (10, 5))
+                tela_base.blit(fonte.render(f"Jogador 2: {estado_jogo['jogadores']['2']['vitorias']}", True, (0, 0, 0)), (450, 5))
 
                 # Mensagens de status
                 vivo = estado_jogo["jogadores"][str(jogador_id)]["vivo"]
