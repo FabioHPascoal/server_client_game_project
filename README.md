@@ -4,7 +4,7 @@ Snake Battle é um jogo multiplayer em rede, onde dois jogadores controlam cobra
 
 ## Descrição
 
-Este projeto foi desenvolvido como exercício de programação em rede. Ele utiliza comunicação via sockets TCP para gerenciar as interações entre dois jogadores, com interface gráfica feita em Pygame e sprites personalizados.
+Este projeto foi desenvolvido como critério avaliativo para a disciplina de Redes de Computadores. Ele utiliza comunicação via sockets TCP para gerenciar as interações entre dois jogadores, com interface gráfica feita em Pygame e sprites personalizados.
 
 ## Tecnologias Utilizadas
 
